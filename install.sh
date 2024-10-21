@@ -1,34 +1,39 @@
 #!/bin/bash
 
-# بررسی اینکه آیا آدرس گیت‌هاب به عنوان ورودی دریافت شده است یا خیر
-if [ -z "$1" ]; then
-    echo "Usage: $0 <https://github.com/Saint-Farhad/Project>"
-    exit 1
-fi
+# به‌روزرسانی لیست بسته‌ها
+echo "Updating system packages..."
+sudo apt update
 
-# کلون کردن مخزن از گیت‌هاب
-REPO_URL=$1
-echo "Cloning the repository from $REPO_URL ..."
-git clone $REPO_URL
+# نصب پکیج‌های سیستمی از جمله psutil
+echo "Installing system packages including psutil..."
+sudo apt install python3-psutil
+sudo apt install -y python3 python3-pip python3-venv git python3-psutil systemd-resolved nftables openvswitch-switch
 
-# استخراج نام پوشه پروژه از آدرس مخزن
-REPO_NAME=$(basename $REPO_URL .git)
 
-# تغییر دایرکتوری به پوشه پروژه
-cd $REPO_NAME || { echo "Failed to enter the project directory"; exit 1; }
+# تنظیم DNS به صورت خودکار
+echo "Setting up DNS..."
+sudo bash -c 'echo "nameserver 8.8.8.8" > /etc/resolv.conf'
+sudo systemctl restart systemd-resolved
 
-# بررسی وجود فایل Install.sh
-if [ ! -f "Install.sh" ]; then
-    echo "Install.sh file not found in the repository!"
-    exit 1
-fi
+# نصب کتابخانه‌های پایتونی در محیط مجازی (بدون psutil چون از طریق apt نصب شد)
+pip install -r requirements.txt
 
-# اعطای مجوز اجرایی به Install.sh
-chmod +x Install.sh
+# تنظیمات nftables
+echo "Applying nftables rules..."
+sudo nft add table inet filter
+sudo nft add chain inet filter input { type filter hook input priority 0 \; policy accept \; }
+sudo nft add chain inet filter output { type filter hook output priority 0 \; policy accept \; }
+sudo nft add chain inet filter forward { type filter hook forward priority 0 \; policy accept \; }
+sudo nft add table ip nat
+sudo nft add chain ip nat prerouting { type nat hook prerouting priority -100 \; policy accept \; }
+sudo nft add chain ip nat postrouting { type nat hook postrouting priority 100 \; policy accept \; }
 
-# اجرای اسکریپت نصب
-echo "Running the Install.sh script..."
-./Install.sh
+# راه‌اندازی مجدد systemd-resolved
+echo "Restarting systemd-resolved service..."
+sudo systemctl restart systemd-resolved
 
-# پایان
+# اجرای برنامه پایتون در محیط مجازی
+python3 tui_main.py
+
+# پایان نصب
 echo "Installation completed successfully."
