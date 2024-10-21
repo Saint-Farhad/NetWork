@@ -45,16 +45,16 @@ Ensure that the following packages and tools are installed on your system before
    ```bash
    git clone https://github.com/Saint-Farhad/NetWork.git
    ```
-   
-2. Run the installation script to install the required dependencies:
+2. Enter to directory:
+   ```bash
+   cd /root/NetWork
+   ```
+
+3. Run the installation script to install the required dependencies:
    ```bash
    sudo bash install.sh
    ```
 
-3. Install the Python dependencies:
-   ```bash
-   pip3 install -r requirements.txt
-   ```
 
 ## Usage
 Once everything is set up, you can start using the tool:
