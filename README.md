@@ -43,7 +43,7 @@ Ensure that the following packages and tools are installed on your system before
 ## Installation
 1. Clone the repository:
    ```bash
-   git clone <repository-url>
+   git clone https://github.com/Saint-Farhad/NetWork.git
    ```
    
 2. Run the installation script to install the required dependencies:
